@@ -40,7 +40,7 @@ pub fn App() -> impl IntoView {
 
     // Editor state
     // Load from localStorage or use default (full example.typ content)
-    const DEFAULT_SOURCE: &str = include_str!("../info/example.typ");
+    const DEFAULT_SOURCE: &str = include_str!("../examples/example.typ");
 
     let initial_source = if let Some(window) = web_sys::window() {
         if let Ok(Some(storage)) = window.local_storage() {

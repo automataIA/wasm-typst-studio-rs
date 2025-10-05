@@ -1,0 +1,45 @@
+netwok2020:
+  type: article
+  title: "The Challenges of Scientific Typesetting in the Modern Era"
+  author: ["Network, A.", "Smith, B."]
+  date: 2020
+  journal: "Journal of Academic Publishing"
+  volume: 15
+  issue: 3
+  pages: "234-256"
+  doi: "10.1234/jap.2020.15.3.234"
+
+netwok2022:
+  type: article
+  title: "LaTeX: A Historical Perspective on Scientific Document Preparation"
+  author: ["Network, A.", "Johnson, C.", "Williams, D."]
+  date: 2022
+  journal: "Computing in Science & Engineering"
+  volume: 24
+  issue: 2
+  pages: "45-62"
+  doi: "10.1234/cise.2022.24.2.045"
+
+typst2023:
+  type: web
+  title: "Typst Documentation"
+  author: "Typst Team"
+  date: 2023
+  url: "https://typst.app/docs"
+
+knuth1984:
+  type: book
+  title: "The TeXbook"
+  author: "Knuth, Donald E."
+  publisher: "Addison-Wesley"
+  date: 1984
+  isbn: "978-0201134476"
+
+lamport1994:
+  type: book
+  title: "LaTeX: A Document Preparation System"
+  author: "Lamport, Leslie"
+  publisher: "Addison-Wesley"
+  date: 1994
+  edition: 2
+  isbn: "978-0201529838"

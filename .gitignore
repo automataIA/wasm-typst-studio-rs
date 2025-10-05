@@ -8,6 +8,7 @@ Cargo.lock
 /info
 /dist
 /target
+/docs
 
 # Node.js
 node_modules/
