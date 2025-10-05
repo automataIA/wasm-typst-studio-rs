@@ -42,6 +42,7 @@ jobs:
         run: cargo check
 
   trunk-build:
+    needs: rust
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -85,13 +86,14 @@ jobs:
         run: |
           touch docs/.nojekyll
 
-      - name: Upload Pages artifact (docs)
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: './docs'
 
       - name: Deploy to GitHub Pages
         id: deploy
         uses: actions/deploy-pages@v4
-        with:
-          timeout: 600000
