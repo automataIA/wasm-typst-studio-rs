@@ -4,7 +4,8 @@
   "description": "Pure Rust WASM Typst Studio with Tailwind CSS 4",
   "scripts": {
     "dev": "trunk serve",
-    "build": "trunk build --release"
+    "build": "trunk build --release",
+    "build-css": "tailwindcss -i ./tailwind.css -o ./public/styles.css --minify"
   },
   "devDependencies": {
     "daisyui": "^5.0.0",
