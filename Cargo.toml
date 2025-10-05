@@ -1,0 +1,75 @@
+[package]
+name = "wasm-typst-studio-rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["dio"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+leptos = { version = "0.8", features = ["csr", "nightly"] }
+leptos_meta = { version = "0.8" }
+leptos_router = { version = "0.8", features = ["nightly"] }
+console_log = "1"
+log = "0.4"
+console_error_panic_hook = "0.1"
+
+# WASM bindings
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = [
+    "Window",
+    "Document",
+    "HtmlElement",
+    "HtmlTextAreaElement",
+    "HtmlAnchorElement",
+    "HtmlInputElement",
+    "Blob",
+    "BlobPropertyBag",
+    "Url",
+    "File",
+    "FileList",
+    "FileReader",
+    "Storage",
+    # Clipboard API (requires web_sys_unstable_apis)
+    "Navigator",
+    "Clipboard",
+    # IndexedDB for image storage
+    "IdbFactory",
+    "IdbDatabase",
+    "IdbObjectStore",
+    "IdbTransaction",
+    "IdbRequest",
+    "IdbOpenDbRequest",
+    "IdbVersionChangeEvent",
+    "IdbTransactionMode",
+    "IdbCursorDirection",
+    "DomStringList",
+] }
+gloo-timers = { version = "0.3", features = ["futures"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+
+# Base64 decoding for images
+base64 = "0.22"
+
+# Typst compilation
+typst-as-lib = { git = "https://github.com/Relacibo/typst-as-lib", features = ["typst-kit-fonts", "typst-kit-embed-fonts"] }
+typst = "0.13"
+typst-svg = "0.13"
+typst-pdf = "0.13"
+typst-syntax = "0.13"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true  # Rimuovi debug symbols per ridurre bundle size

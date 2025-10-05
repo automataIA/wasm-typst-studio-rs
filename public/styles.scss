@@ -1,0 +1,368 @@
+/* ==================== Typst Studio Styles ==================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+header {
+    padding: 1rem 1.5rem;
+    background: #252526;
+    border-bottom: 1px solid #3e3e42;
+    flex-shrink: 0;
+
+    h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #cccccc;
+    }
+
+    .subtitle {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        color: #858585;
+    }
+}
+
+.editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    flex: 1;
+    overflow: hidden;
+    background: #3e3e42;
+}
+
+.editor-pane,
+.preview-pane {
+    display: flex;
+    flex-direction: column;
+    background: #1e1e1e;
+    overflow: hidden;
+
+    h2 {
+        margin: 0;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #858585;
+        background: #252526;
+        border-bottom: 1px solid #3e3e42;
+        letter-spacing: 0.5px;
+    }
+}
+
+// Editor container con overlay
+.editor-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.syntax-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1rem;
+    overflow: auto;
+    pointer-events: none; // Permette click-through al textarea
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: transparent; // Nasconde testo base
+    background: transparent;
+
+    // Nascondi scrollbar dell'overlay (solo textarea deve mostrarla)
+    scrollbar-width: none; // Firefox
+    &::-webkit-scrollbar {
+        display: none; // Chrome, Safari, Edge
+    }
+
+    pre, code {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+    }
+
+    // Syntax highlighting colors (VSCode Dark+ theme)
+    .comment { color: #6A9955; font-style: italic; }
+    .keyword { color: #C586C0; font-weight: bold; }
+    .markup { color: #CE9178; }
+    .string { color: #CE9178; }
+    .number { color: #B5CEA8; }
+    .heading { color: #569CD6; font-weight: bold; }
+    .code { color: #D16969; background: #2d2d2d; }
+    .math { color: #4EC9B0; }
+    .function { color: #DCDCAA; }
+    .label { color: #4FC1FF; }
+    .operator { color: #D4D4D4; }
+}
+
+.typst-editor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1rem;
+    background: transparent;
+    color: #d4d4d4;
+    caret-color: #fff; // Cursore visibile
+    border: none;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+
+    &::placeholder {
+        color: #6a6a6a;
+    }
+
+    // Testo trasparente per vedere l'overlay
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+
+    &::selection {
+        background: rgba(38, 79, 120, 0.4);
+    }
+}
+
+.content {
+    flex: 1;
+    overflow: auto;
+}
+
+.output {
+    padding: 1rem;
+    overflow: auto;
+
+    svg {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+.preview-container {
+    padding: 1rem;
+    width: 100%;
+
+    svg {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+}
+
+.error {
+    margin: 1rem;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    color: #f48771;
+    background: #2d0d0d;
+    border-left: 3px solid #f48771;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+
+    .error-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .error-message {
+        flex: 1;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3e3e42;
+    border-radius: 5px;
+
+    &:hover {
+        background: #4e4e52;
+    }
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    .editor-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+}
+
+/* ==================== Theme Contrast Improvements (WCAG AA) ==================== */
+
+/* Dark theme - improved contrast */
+[data-theme="dark"] {
+    // Header improvements
+    .navbar {
+        background-color: hsl(var(--b2));
+        border-bottom: 1px solid hsl(var(--b3));
+    }
+
+    // Source/Preview headers
+    .bg-base-200 {
+        background-color: hsl(220 13% 18%) !important; // Darker background
+    }
+
+    // Text contrast improvements
+    .text-base-content\/70 {
+        color: hsl(var(--bc) / 0.85) !important; // Increased from 70% to 85%
+    }
+
+    // Button contrast
+    .btn-xs {
+        background-color: hsl(var(--b3));
+        border-color: hsl(var(--bc) / 0.2);
+        color: hsl(var(--bc) / 0.9);
+
+        &:hover {
+            background-color: hsl(var(--p));
+            color: hsl(var(--pc));
+            border-color: hsl(var(--p));
+        }
+    }
+
+    // Editor background - pure black for better contrast
+    .typst-editor, .syntax-overlay {
+        background-color: hsl(220 13% 14%);
+        color: hsl(var(--bc));
+    }
+
+    // Preview background - slightly lighter for readability
+    .preview-container {
+        background-color: hsl(0 0% 98%);
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin: 1rem;
+    }
+
+    // Icon colors - better visibility
+    .icon-\[lucide--code\] {
+        color: hsl(var(--s)) !important;
+    }
+
+    .icon-\[lucide--eye\] {
+        color: hsl(var(--a)) !important;
+    }
+
+    // Divider visibility
+    .divider-horizontal:before,
+    .divider-horizontal:after {
+        background-color: hsl(var(--bc) / 0.2) !important;
+    }
+}
+
+/* Light theme (business) - improved contrast */
+[data-theme="business"] {
+    // Header improvements
+    .navbar {
+        background-color: hsl(var(--b2));
+        border-bottom: 1px solid hsl(var(--bc) / 0.1);
+    }
+
+    // Source/Preview headers
+    .bg-base-200 {
+        background-color: hsl(0 0% 94%) !important; // Lighter gray
+    }
+
+    // Text contrast improvements
+    .text-base-content\/70 {
+        color: hsl(var(--bc) / 0.8) !important; // Darker text
+    }
+
+    // Button contrast
+    .btn-xs {
+        background-color: hsl(0 0% 100%);
+        border-color: hsl(var(--bc) / 0.2);
+        color: hsl(var(--bc) / 0.8);
+
+        &:hover {
+            background-color: hsl(var(--p));
+            color: hsl(var(--pc));
+            border-color: hsl(var(--p));
+        }
+    }
+
+    // Editor background
+    .typst-editor, .syntax-overlay {
+        background-color: hsl(0 0% 100%);
+        color: hsl(220 9% 20%); // Dark text for readability
+    }
+
+    // Preview background
+    .preview-container {
+        background-color: hsl(0 0% 100%);
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    // Icon colors
+    .icon-\[lucide--code\] {
+        color: hsl(var(--s)) !important;
+    }
+
+    .icon-\[lucide--eye\] {
+        color: hsl(var(--a)) !important;
+    }
+
+    // Border improvements
+    .border-base-300 {
+        border-color: hsl(var(--bc) / 0.15) !important;
+    }
+
+    // Divider visibility
+    .divider-horizontal:before,
+    .divider-horizontal:after {
+        background-color: hsl(var(--bc) / 0.15) !important;
+    }
+}
