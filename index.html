@@ -12,7 +12,11 @@
   <!-- Include favicon in dist output -->
   <link data-trunk rel="icon" href="public/favicon.ico" />
 
-  <!-- WASM with weak-refs support, wasm-opt disabled for bulk-memory compatibility -->
+  <!-- WASM with weak-refs support, wasm-opt disabled due to feature flag limitations -->
+  <!-- Note: Trunk's wasm-opt doesn't support required feature flags -->
+  <!-- For manual optimization (via compress-wasm.sh): -->
+  <!-- wasm-opt --enable-bulk-memory --enable-sign-ext --enable-nontrapping-float-to-int -Oz input.wasm -o output.wasm -->
+  <!-- Reduction: ~4.4% (23.16 MB → 22.15 MB measured) -->
   <link data-trunk rel="rust" data-wasm-opt="0" data-weak-refs />
 </head>
 

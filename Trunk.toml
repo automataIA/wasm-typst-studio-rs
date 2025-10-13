@@ -35,8 +35,10 @@ ignore = []
 [serve]
 # The address to serve on.
 addresses = ["127.0.0.1"]
-# The port to serve on.
-port = 3000
+# The port to serve on (changed to 1420 for Tauri compatibility)
+port = 1420
+# Protocol used for autoreload WebSockets connection (required for Tauri mobile dev)
+ws_protocol = "ws"
 # Aliases to serve, typically found in an /etc/hosts file.
 # aliases = ["http://localhost.mywebsite.com"]
 # Disable the reverse DNS lookup during startup

@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "trunk serve",
     "build": "trunk build --release",
-    "build-css": "tailwindcss -i ./tailwind.css -o ./public/styles.css --minify"
+    "build:optimized": "trunk build --release && ./scripts/compress-wasm.sh",
+    "build-css": "tailwindcss -i ./tailwind.css -o ./public/styles.css --minify",
+    "tauri:dev": "cargo tauri dev",
+    "tauri:build": "cargo tauri build",
+    "size-report": "./scripts/size-report.sh"
   },
   "devDependencies": {
     "daisyui": "^5.0.0",

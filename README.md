@@ -1,9 +1,10 @@
 # Typst Studio WASM
 
-A modern, web-based [Typst](https://typst.app) editor built entirely in Rust using WebAssembly. Write and preview Typst documents directly in your browser with real-time compilation, syntax highlighting, and multi-page support.
+A modern [Typst](https://typst.app) editor built entirely in Rust using WebAssembly. Available as both a **web application** and a **native desktop app** (via Tauri). Write and preview Typst documents with real-time compilation, syntax highlighting, and multi-page support.
 
 ## ✨ Features
 
+### Core Features
 - **🚀 100% Rust + WASM** - No JavaScript required, fully compiled to WebAssembly
 - **📝 Live Preview** - Real-time Typst compilation as you type
 - **🎨 Syntax Highlighting** - VSCode Dark+ theme with comprehensive Typst syntax support
@@ -17,14 +18,25 @@ A modern, web-based [Typst](https://typst.app) editor built entirely in Rust usi
 - **📐 IEEE Templates** - Built-in support for IEEE-style academic papers
 - **🔄 Dual Mode Editor** - Switch between source code and visual editing modes
 
+### Deployment Options
+- **🌐 Web App** - Run in any modern browser, deploy to GitHub Pages/Netlify
+- **🖥️ Desktop App** - Native application for Windows, Linux, and macOS via Tauri
+- **📦 Same Codebase** - Single codebase for both web and desktop deployments
+
 ## 🛠️ Tech Stack
 
+### Frontend (Shared)
 - **[Rust](https://www.rust-lang.org/)** - Systems programming language
 - **[Leptos 0.8](https://leptos.dev/)** - Reactive web framework for Rust
-- **[Trunk](https://trunkrs.dev/)** - WASM web application bundler
 - **[typst-as-lib](https://github.com/Myriad-Dreamin/typst.ts)** - Typst compilation engine
 - **[Tailwind CSS](https://tailwindcss.com/)** + **[DaisyUI](https://daisyui.com/)** - Styling framework
 - **[Iconify](https://iconify.design/)** - Icon library
+
+### Web Deployment
+- **[Trunk](https://trunkrs.dev/)** - WASM web application bundler
+
+### Desktop Deployment
+- **[Tauri 2.8](https://tauri.app/)** - Native desktop application framework
 
 ## 📋 Prerequisites
 
@@ -49,9 +61,11 @@ cargo install trunk
 
 ## 🚀 Quick Start
 
-### Development
+> **📖 TL;DR?** See [QUICK_START.md](./QUICK_START.md) for a concise command reference.
 
-Clone the repository and start the development server:
+### Web Development
+
+Clone the repository and start the web development server:
 
 ```bash
 # Install Node dependencies (for Tailwind CSS)
@@ -60,19 +74,41 @@ npm install
 # Build Tailwind CSS
 npm run build-css
 
-# Start development server
+# Start web development server
 trunk serve --open
 ```
 
 This will:
 - Compile the Rust code to WASM
-- Start a local server at `http://localhost:3000`
+- Start a local server at `http://localhost:1420`
 - Open the app in your default browser
 - Watch for file changes and auto-reload
 
+### Desktop Development (Tauri)
+
+Run as a native desktop application:
+
+```bash
+# Install dependencies (first time only)
+npm install
+
+# Start desktop app with hot-reload
+npm run tauri:dev
+# or
+cargo tauri dev
+```
+
+This will:
+- Start trunk serve automatically
+- Compile the Tauri backend
+- Open a native desktop window
+- Enable hot-reload for both frontend and backend
+
 ### Production Build
 
-Build an optimized release version:
+#### Web Build
+
+Build an optimized web version:
 
 ```bash
 # Build for production (GitHub Pages)
@@ -84,41 +120,74 @@ trunk build --release
 
 The compiled files will be available in the `docs/` directory (GitHub Pages) or `dist/` directory (standard), ready to be deployed to any static hosting service.
 
-### GitHub Pages Deployment
+**GitHub Pages Deployment**: The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically builds and deploys to GitHub Pages on push to main/master branch.
 
-The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically builds and deploys to GitHub Pages on push to main/master branch.
+#### Desktop Build
+
+Build native desktop installers:
+
+```bash
+# Build desktop app for your platform
+npm run tauri:build
+# or
+cargo tauri build
+```
+
+The installers will be generated in `src-tauri/target/release/bundle/`:
+- **Linux**: `.deb`, `.AppImage`, `.rpm`
+- **Windows**: `.msi`, `.exe`
+- **macOS**: `.dmg`, `.app`
+
+**Installer Size**: ~85-100 MB (includes Tauri runtime + WASM bundle)
 
 ## 📁 Project Structure
 
 ```
 wasm-typst-studio-rs/
-├── src/
+├── src/                        # Frontend Leptos app (shared by web & desktop)
 │   ├── lib.rs                  # Main application entry point
+│   ├── main.rs                 # WASM entry point
 │   ├── compiler/
 │   │   ├── typst.rs            # Typst compilation wrapper with static file resolver
+│   │   └── mod.rs
+│   ├── components/             # UI components
+│   │   ├── editor.rs
+│   │   ├── preview.rs
+│   │   ├── image_gallery.rs
 │   │   └── mod.rs
 │   └── utils/
 │       ├── highlight.rs        # Syntax highlighting implementation
 │       ├── image_manager.rs    # Image management with sequential IDs
 │       ├── image_storage.rs    # IndexedDB for image storage
 │       └── mod.rs
+├── src-tauri/                  # Tauri backend (desktop only)
+│   ├── src/
+│   │   ├── main.rs             # Desktop app entry point
+│   │   └── lib.rs              # Tauri setup and configuration
+│   ├── Cargo.toml              # Backend dependencies
+│   ├── tauri.conf.json         # Tauri configuration
+│   ├── build.rs                # Build script
+│   ├── capabilities/           # Permission system
+│   └── icons/                  # App icons for different platforms
 ├── public/
 │   └── favicon.ico
-├── info/
+├── examples/
 │   ├── example.typ             # Default example document
 │   ├── example2.typ            # IEEE template example
 │   └── refs.yml                # Bibliography in Hayagriva YAML format
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml          # GitHub Pages deployment workflow
-├── index.html                  # HTML template
+├── index.html                  # HTML template (web)
 ├── tailwind.css                # Tailwind CSS with custom styles
 ├── tailwind.config.js          # Tailwind configuration
 ├── Trunk.toml                  # Trunk configuration (development)
 ├── Trunk-release.toml          # Trunk configuration (production/GitHub Pages)
-├── Cargo.toml                  # Rust dependencies
-├── package.json                # Node dependencies (Tailwind)
-└── rust-toolchain.toml         # Rust toolchain version
+├── Cargo.toml                  # Frontend Rust dependencies
+├── package.json                # Node dependencies (Tailwind + scripts)
+├── rust-toolchain.toml         # Rust toolchain version
+├── README.md                   # This file
+└── TAURI_INTEGRATION.md        # Detailed Tauri integration guide
 ```
 
 ## 🎯 Usage
@@ -237,11 +306,18 @@ targets = ["wasm32-unknown-unknown"]
 
 ## 🐛 Known Limitations
 
+### Web Version
 - **System Fonts** - Not available in WASM; uses embedded fonts only
 - **File System** - No direct file system access; uses IndexedDB for images and virtual file resolver for bibliography
 - **Large Documents** - Very large documents may experience performance degradation
 - **Image Limit** - Maximum 999 images per session (sequential ID constraint)
 - **External Resources** - Cannot load external files or packages (all resources must be embedded)
+
+### Desktop Version
+- Most web limitations are resolved or can be addressed with Tauri APIs
+- **File System Access** - Can be added via Tauri commands (see `TAURI_INTEGRATION.md`)
+- **Native Dialogs** - Open/Save dialogs available
+- **System Fonts** - Still limited by WASM constraints in current implementation
 
 ## 🤝 Contributing
 
@@ -276,14 +352,47 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📚 Resources
 
+### Typst
 - [Typst Documentation](https://typst.app/docs)
 - [Typst Tutorial](https://typst.app/docs/tutorial/)
 - [Hayagriva YAML Format](https://github.com/typst/hayagriva/blob/main/docs/file-format.md)
+- [typst-as-lib](https://github.com/Myriad-Dreamin/typst.ts)
+
+### Rust & WASM
 - [Leptos Book](https://book.leptos.dev/)
 - [Trunk Documentation](https://trunkrs.dev/)
-- [typst-as-lib](https://github.com/Myriad-Dreamin/typst.ts)
 - [WebAssembly Concepts](https://developer.mozilla.org/en-US/docs/WebAssembly)
+
+### Tauri (Desktop)
+- [Tauri Documentation](https://v2.tauri.app/)
+- [Tauri + Leptos Guide](https://v2.tauri.app/start/frontend/leptos/)
+- [TAURI_INTEGRATION.md](./TAURI_INTEGRATION.md) - Detailed integration guide for this project
+- [Tauri API Reference](https://v2.tauri.app/reference/javascript/api/)
+
+## 🖥️ Desktop App Details
+
+This project supports both web and desktop deployments from the same codebase. For detailed information about:
+- Desktop-specific features
+- Tauri configuration
+- Native API integration
+- File system access
+- Building and distributing desktop apps
+
+See **[TAURI_INTEGRATION.md](./TAURI_INTEGRATION.md)** for the complete guide.
+
+## 📖 Documentation Index
+
+### Main Documentation
+- **[README.md](./README.md)** - Main documentation (this file)
+- **[QUICK_START.md](./QUICK_START.md)** - Quick command reference
+- **[TAURI_INTEGRATION.md](./TAURI_INTEGRATION.md)** - Desktop app integration guide
+
+### Build & Optimization Guides
+- **[info/BUILD_REQUIREMENTS.md](./info/BUILD_REQUIREMENTS.md)** - System requirements and packages for each OS
+- **[info/OPTIMIZATION_REPORT.md](./info/OPTIMIZATION_REPORT.md)** - Complete optimization analysis and recommendations
+- **[info/OPTIMIZATIONS_APPLIED.md](./info/OPTIMIZATIONS_APPLIED.md)** - Implemented optimizations details
+- **[info/OPTIMIZATIONS_SUMMARY.md](./info/OPTIMIZATIONS_SUMMARY.md)** - Quick optimization results overview
 
 ---
 
-**Built with ❤️ using Rust and WebAssembly**
+**Built with ❤️ using Rust, WebAssembly, and Tauri**

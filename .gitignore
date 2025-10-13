@@ -29,6 +29,10 @@ node_modules/
 # Trunk cache
 .trunk/
 
+# Tauri specific
+/src-tauri/target
+/src-tauri/WixTools
+
 # Editor temp files
 *~
 #*#
