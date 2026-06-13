@@ -2,98 +2,94 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
+# Least privilege for an artifact-based Pages deploy.
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
+# Don't cancel an in-flight Pages deployment.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  rust:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust (nightly with components)
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-          components: rustfmt, clippy
-          targets: wasm32-unknown-unknown
-          override: true
-
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cargo check
-        run: cargo check
-
-  trunk-build:
-    needs: rust
+  deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust (stable + wasm target)
+      # Project pins nightly via rust-toolchain.toml.
+      - name: Install Rust (nightly + wasm target)
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: stable
+          toolchain: nightly
           targets: wasm32-unknown-unknown
-          override: true
 
-      - name: Ensure wasm target is installed
-        run: rustup target add wasm32-unknown-unknown
+      # sccache speeds up the heavy Typst WASM build across runs.
+      - name: Install sccache
+        run: |
+          wget -qO- https://github.com/mozilla/sccache/releases/download/v0.8.1/sccache-v0.8.1-x86_64-unknown-linux-musl.tar.gz \
+            | tar -xzf- -C /usr/local/bin --strip-components=1
+
+      - name: Configure sccache cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/sccache
+          key: sccache-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            sccache-${{ runner.os }}-
+
+      - name: Set RUSTC_WRAPPER
+        run: echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: '20'
 
+      # Load-bearing: Trunk's pre_build hook runs @tailwindcss/cli, which loads the
+      # daisyUI and @iconify/tailwind4 plugins from node_modules. `npm install` (not
+      # `npm ci`) because package-lock.json is intentionally gitignored.
       - name: Install Node deps
-        run: npm ci
+        run: npm install
 
-      - name: Build CSS (Tailwind)
-        run: npm run build-css
+      # Prebuilt binary (~10s) instead of `cargo install trunk` (~5min).
+      - name: Install Trunk
+        run: |
+          wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xzf- -C /usr/local/bin
 
-      - name: Install trunk
-        run: cargo install trunk --locked
-
-      - name: Trunk build (release)
+      - name: Trunk build (release, GitHub Pages)
         env:
           RUST_BACKTRACE: 1
-        run: |
-          trunk build --config Trunk-release.toml
+        run: trunk build --config Trunk-release.toml
 
-      - name: Add .nojekyll to docs
-        run: |
-          touch docs/.nojekyll
+      # SPA fallback for GitHub Pages (defensive; harmless without a router).
+      - name: Copy index.html to 404.html
+        run: cp dist/index.html dist/404.html
+
+      - name: Disable Jekyll
+        run: touch dist/.nojekyll
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs'
+          path: './dist'
 
       - name: Deploy to GitHub Pages
-        id: deploy
+        id: deployment
         uses: actions/deploy-pages@v4

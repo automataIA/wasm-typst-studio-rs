@@ -47,12 +47,6 @@ impl ImageManager {
         Ok(format!("{:03}", next))
     }
 
-    /// Reset counter to 0
-    #[allow(dead_code)]
-    pub fn reset_counter() {
-        Self::set_counter(0);
-    }
-
     /// Store image with sequential ID
     pub async fn store_image(&self, base64_data: &str, filename: &str) -> Result<String, String> {
         let id = Self::generate_next_id()?;
@@ -70,28 +64,6 @@ impl ImageManager {
         log::info!("Image stored with ID: {} ({})", id, filename);
 
         Ok(id)
-    }
-
-    /// Get image data by ID
-    #[allow(dead_code)]
-    pub async fn get_image(&self, id: &str) -> Result<String, String> {
-        let metadata_json = self.storage.get_image(id).await?;
-
-        // Parse JSON to extract data field
-        if let Some(_window) = web_sys::window() {
-            if let Ok(json) = js_sys::JSON::parse(&metadata_json) {
-                if let Ok(obj) = json.dyn_into::<js_sys::Object>() {
-                    let data_key = wasm_bindgen::JsValue::from_str("data");
-                    if let Ok(data) = js_sys::Reflect::get(&obj, &data_key) {
-                        if let Some(data_str) = data.as_string() {
-                            return Ok(data_str);
-                        }
-                    }
-                }
-            }
-        }
-
-        Err(format!("Failed to parse image metadata for ID: {}", id))
     }
 
     /// List all images with metadata

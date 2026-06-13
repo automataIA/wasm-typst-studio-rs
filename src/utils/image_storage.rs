@@ -146,7 +146,6 @@ impl ImageStorage {
     }
 
     /// Retrieve an image by ID
-    #[allow(dead_code)]
     pub async fn get_image(&self, image_id: &str) -> Result<String, String> {
         let db = self.init().await?;
 
@@ -178,7 +177,6 @@ impl ImageStorage {
     }
 
     /// Delete an image by ID
-    #[allow(dead_code)]
     pub async fn delete_image(&self, image_id: &str) -> Result<(), String> {
         let db = self.init().await?;
 
@@ -205,15 +203,6 @@ impl ImageStorage {
 
         log::info!("Image deleted: {}", image_id);
         Ok(())
-    }
-
-    /// Generate a unique image ID based on timestamp and random value
-    #[allow(dead_code)]
-    pub fn generate_image_id() -> String {
-        use js_sys::Date;
-        let timestamp = Date::now() as u64;
-        let random = (js_sys::Math::random() * 1_000_000.0) as u32;
-        format!("img_{}_{}", timestamp, random)
     }
 
     /// List all images with their IDs and data

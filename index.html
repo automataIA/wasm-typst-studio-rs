@@ -6,10 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Typst Studio - Pure Rust WASM</title>
 
-  <!-- Tailwind CSS 4 with daisyUI 5 and Lucide icons -->
-  <link data-trunk rel="tailwind-css" href="tailwind.css" />
+  <!-- SEO / social metadata -->
+  <meta name="description"
+    content="Typst Studio is a fully client-side Typst editor compiled to WebAssembly in pure Rust — write Typst markup and preview typeset SVG/PDF instantly in the browser." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Typst Studio - Pure Rust WASM" />
+  <meta property="og:description"
+    content="A fully client-side Typst editor compiled to WebAssembly in pure Rust. Live SVG/PDF preview, no server." />
+  <meta name="twitter:card" content="summary" />
 
-  <!-- Include favicon in dist output -->
+  <!-- Copy robots.txt into the dist output -->
+  <link data-trunk rel="copy-file" href="public/robots.txt" />
+
+  <!-- Copy the logo SVG into the dist root (stable name) so the in-app header <img> can load it -->
+  <link data-trunk rel="copy-file" href="public/ty_bolt.svg" />
+
+  <!-- Tailwind CSS 4 + daisyUI 5 + Lucide icons. Compiled from tailwind.css by @tailwindcss/cli
+       in Trunk's pre_build hook (see Trunk.toml); this includes the hashed result. -->
+  <link data-trunk rel="css" href="tailwind.gen.css" />
+
+  <!-- Include favicon in dist output. Modern browsers prefer the crisp SVG (relative href
+       resolves correctly under both dev `/` and the GitHub Pages sub-path); .ico is the fallback. -->
+  <link rel="icon" type="image/svg+xml" href="ty_bolt.svg" />
   <link data-trunk rel="icon" href="public/favicon.ico" />
 
   <!-- WASM with weak-refs support, wasm-opt disabled due to feature flag limitations -->

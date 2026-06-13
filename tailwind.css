@@ -1,18 +1,32 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Scan the Leptos `view!` macros for utility/daisyUI classes (replaces the v3 `content` array). */
+@source "./src/**/*.rs";
+
+/* daisyUI 5 (CSS-first). The custom dark palette is layered via the `--color-*` overrides below. */
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+}
+
+/* Iconify dynamic icons: powers the `icon-[lucide--*]` classes (needs @iconify-json/lucide). */
+@plugin "@iconify/tailwind4";
 
 /* Preview scroll area - area scrollabile con altezza vincolata */
 .preview-scroll-area {
     height: 0;
     flex: 1;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 /* Preview content container */
 .preview-content {
     padding: 1rem;
+}
+
+/* Per-page wrapper: spacing between pages. */
+.preview-page + .preview-page {
+    margin-top: 1rem;
 }
 
 /* SVG styling */
@@ -51,8 +65,33 @@
 }
 
 /* Light theme editor background */
-[data-theme="business"] .editor-container {
+[data-theme="light"] .editor-container {
     background: #ffffff;
+}
+
+/* Line-number gutter: shares the textarea's font metrics + top padding so the
+   numbers line up with the source rows. Vertical scroll is synced from JS;
+   its own overflow is hidden so it never shows a second scrollbar. */
+.editor-gutter {
+    flex: 0 0 auto;
+    min-width: 3ch;
+    overflow: hidden;
+    white-space: pre;
+    text-align: right;
+    padding: 8px 8px 8px 12px;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #6a737d;
+    user-select: none;
+    background: var(--color-base-200);
+    border-right: 1px solid var(--color-base-300);
+}
+
+.editor-scroll {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
 }
 
 .syntax-overlay {
@@ -63,8 +102,7 @@
     bottom: 0;
     pointer-events: none;
     overflow: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    white-space: pre;
     font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.6;
@@ -96,6 +134,20 @@
 .syntax-overlay .label { color: #4FC1FF; }
 .syntax-overlay .operator { color: #D4D4D4; }
 
+/* Light theme syntax highlighting (VSCode Light+ palette) */
+[data-theme="light"] .syntax-overlay { color: #1f1f1f; }
+[data-theme="light"] .syntax-overlay .comment { color: #008000; }
+[data-theme="light"] .syntax-overlay .keyword { color: #AF00DB; }
+[data-theme="light"] .syntax-overlay .markup { color: #A31515; }
+[data-theme="light"] .syntax-overlay .string { color: #A31515; }
+[data-theme="light"] .syntax-overlay .number { color: #098658; }
+[data-theme="light"] .syntax-overlay .heading { color: #0000C0; }
+[data-theme="light"] .syntax-overlay .code { color: #800000; background: #e8e8e8; }
+[data-theme="light"] .syntax-overlay .math { color: #267F99; }
+[data-theme="light"] .syntax-overlay .function { color: #795E26; }
+[data-theme="light"] .syntax-overlay .label { color: #001080; }
+[data-theme="light"] .syntax-overlay .operator { color: #1f1f1f; }
+
 .typst-editor {
     position: absolute;
     top: 0;
@@ -110,13 +162,16 @@
     resize: none;
     outline: none;
     overflow: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    white-space: pre;
     font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.6;
     padding: 8px;
     z-index: 2;
+}
+
+[data-theme="light"] .typst-editor {
+    caret-color: #000;
 }
 
 .typst-editor::placeholder {
@@ -151,7 +206,7 @@
     width: 50%;
     min-width: 400px;
     max-width: 800px;
-    background: #1d232a;
+    background: var(--color-base-100);
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
     z-index: 51;
     display: flex;
@@ -164,24 +219,31 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem;
-    border-bottom: 1px solid #2a323c;
+    border-bottom: 1px solid var(--color-base-300);
     flex-shrink: 0;
-    background: #191e24;
+    background: var(--color-base-200);
 }
 
 .drawer-content {
     flex: 1;
     overflow-y: auto;
     padding: 1.5rem;
-    background: #1d232a;
+    background: var(--color-base-100);
 }
 
 .upload-zone {
     padding: 2rem;
-    border: 2px dashed #3d4451;
+    border: 2px dashed var(--color-base-300);
     border-radius: 0.5rem;
     text-align: center;
-    background: #191e24;
+    background: var(--color-base-200);
+    transition: border-color 0.2s, background 0.2s;
+}
+
+/* Drag-and-drop active state */
+.upload-zone.dragover {
+    border-color: var(--color-primary);
+    background: color-mix(in oklab, var(--color-primary) 12%, var(--color-base-200));
 }
 
 .image-gallery-grid {
@@ -191,13 +253,13 @@
 }
 
 .image-card {
-    background: #191e24;
+    background: var(--color-base-200);
     border-radius: 0.5rem;
     padding: 0.75rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    border: 1px solid #2a323c;
+    border: 1px solid var(--color-base-300);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -210,7 +272,7 @@
     aspect-ratio: 4/3;
     border-radius: 0.375rem;
     overflow: hidden;
-    background: #15191e;
+    background: var(--color-base-300);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -253,5 +315,57 @@
     }
     to {
         transform: translateX(0);
+    }
+}
+
+/*
+ * Custom "dark" theme palette (VSCode Dark+).
+ * daisyUI 5 ignores the JS-config theme object (tailwind.config.js), so the
+ * palette is applied here by overriding daisyUI's theme CSS variables.
+ * Higher specificity (`html[...]`) guarantees we win over daisyUI's
+ * `[data-theme="dark"]` rule. This also fixes the WCAG contrast failure
+ * (stock primary #605dff was 3.39:1; #569CD6 on the dark base is ~5.9:1).
+ */
+html[data-theme="dark"] {
+    --color-primary: #569CD6;
+    --color-primary-content: #11161c;
+    --color-secondary: #C586C0;
+    --color-secondary-content: #11161c;
+    --color-accent: #4EC9B0;
+    --color-accent-content: #11161c;
+    --color-neutral: #1e1e1e;
+    --color-neutral-content: #d4d4d4;
+    --color-base-100: #1e1e1e;
+    --color-base-200: #252526;
+    --color-base-300: #2d2d2d;
+    --color-base-content: #d4d4d4;
+    --color-info: #3ABFF8;
+    --color-info-content: #11161c;
+    --color-success: #36D399;
+    --color-success-content: #11161c;
+    --color-warning: #FBBD23;
+    --color-warning-content: #11161c;
+    --color-error: #F87272;
+    --color-error-content: #11161c;
+}
+
+/* Respect users who prefer reduced motion: disable drawer/card animations. */
+@media (prefers-reduced-motion: reduce) {
+
+    .drawer-overlay,
+    .drawer-container {
+        animation: none;
+    }
+
+    .image-card {
+        transition: none;
+    }
+
+    .image-card:hover {
+        transform: none;
+    }
+
+    .upload-zone {
+        transition: none;
     }
 }

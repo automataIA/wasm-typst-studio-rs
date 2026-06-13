@@ -1,3 +1,12 @@
+# Tailwind CSS v4 + daisyUI 5 + Iconify are built by the full Node CLI (@tailwindcss/cli) via the
+# pre_build hook below — NOT Trunk's bundled standalone binary, whose restricted runtime can't load
+# the @iconify/tailwind4 plugin (it imports @iconify/tools). Output -> tailwind.gen.css, which
+# index.html includes via `data-trunk rel="css"`.
+[[hooks]]
+stage = "pre_build"
+command = "sh"
+command_arguments = ["-c", "npx @tailwindcss/cli -i ./tailwind.css -o ./tailwind.gen.css"]
+
 [build]
 # The index HTML file to drive the bundling process.
 target = "index.html"
@@ -27,8 +36,9 @@ inject_scripts = true
 # cargo_profile = "release-trunk"
 
 [watch]
-# Paths to watch. The `build.target`'s parent folder is watched by default.
-watch = []
+# Explicit watch list (instead of the whole project root) so the hook-generated
+# `tailwind.gen.css` at the root is NOT watched — otherwise its rewrite loops the watcher.
+watch = ["src", "tailwind.css", "index.html", "public"]
 # Paths to ignore.
 ignore = []
 

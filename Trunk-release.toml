@@ -1,3 +1,12 @@
+# Tailwind CSS v4 + daisyUI 5 + Iconify are built by the full Node CLI (@tailwindcss/cli) via the
+# pre_build hook below — NOT Trunk's bundled standalone binary, whose restricted runtime can't load
+# the @iconify/tailwind4 plugin (it imports @iconify/tools). Output -> tailwind.gen.css, which
+# index.html includes via `data-trunk rel="css"`.
+[[hooks]]
+stage = "pre_build"
+command = "sh"
+command_arguments = ["-c", "npx @tailwindcss/cli -i ./tailwind.css -o ./tailwind.gen.css --minify"]
+
 [build]
 # The index HTML file to drive the bundling process.
 target = "index.html"
@@ -5,8 +14,8 @@ target = "index.html"
 release = true
 # Use a custom cargo profile. Overrides the default chosen by cargo. Ignored if the 'index.html' has one configured.
 # cargo_profile = ""
-# The output dir for all final assets (GitHub Pages uses docs folder).
-dist = "docs"
+# The output dir for all final assets (ephemeral; uploaded as a Pages artifact by CI).
+dist = "dist"
 # The public URL from which assets are to be served (must match GitHub Pages repo name)
 public_url = "/wasm-typst-studio-rs/"
 # Whether to include hash values in the output file names.

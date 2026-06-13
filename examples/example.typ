@@ -1,7 +1,3 @@
-// Configurazione globale del documento
-#set math.equation(numbering: "(1)")
-#set page(numbering: "1")
-
 = Hello Typst!
 
 This is a *Typst* editor in pure Rust WASM.
@@ -71,24 +67,24 @@ $ integral_0^oo e^(-x^2) dif x = sqrt(pi)/2 $
 
 == Complex Examples
 
-La sezione aurea è definita come:
+The golden ratio is defined as:
 
 $ phi.alt := (1 + sqrt(5)) / 2 $ <golden-ratio>
 
-Usando @golden-ratio, possiamo calcolare i numeri di Fibonacci:
+Using @golden-ratio, we can compute the Fibonacci numbers:
 
 $ F_n = floor(1 / sqrt(5) phi.alt^n) $ <fibonacci>
 
-Come mostrato in @fibonacci, la formula è elegante.
+As shown in @fibonacci, the formula is elegant.
 
-Matrice example:
+Matrix example:
 $ mat(
   1, 2, 3;
   4, 5, 6;
   7, 8, 9
 ) $
 
-Sistema di equazioni:
+System of equations:
 $ cases(
   x + y = 5,
   2x - y = 1
@@ -128,17 +124,17 @@ Styled table:
 
 = Figures and Images
 
-Nel testo: vedi @mia-figura per dettagli.
+In the text: see @my-figure for details.
 
 #figure(
   rect(width: 80%, height: 120pt, fill: rgb("#e0e0e0")),
-  caption: [Placeholder per immagine],
-) <mia-figura>
+  caption: [Image placeholder],
+) <my-figure>
 
-// Per caricare un'immagine vera:
-// 1. Clicca "Image" nella toolbar
-// 2. Seleziona un file
-// 3. Usa l'ID generato (es. img_123456_789) nel codice
+// To load a real image:
+// 1. Click "Images" in the toolbar
+// 2. Select a file
+// 3. Use the generated ID (e.g. 001) in your code
 
 = Advanced Layout
 

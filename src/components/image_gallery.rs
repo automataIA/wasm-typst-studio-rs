@@ -13,6 +13,8 @@ pub fn ImageGalleryDrawer(
     let (images, set_images) = signal(Vec::<ImageMetadata>::new());
     let (uploading, set_uploading) = signal(false);
     let (toast_message, set_toast_message) = signal(Option::<String>::None);
+    // Visual state while a file is dragged over the upload zone.
+    let (dragover, set_dragover) = signal(false);
 
     // Load images when drawer opens
     Effect::new(move |_| {
@@ -38,52 +40,83 @@ pub fn ImageGalleryDrawer(
         }
     });
 
-    // Handle file upload
+    // Read a single image file and store it (shared by the file picker and drag-and-drop).
+    let process_file = move |file: web_sys::File| {
+        if !file.type_().starts_with("image/") {
+            set_toast_message.set(Some("Only image files are supported".to_string()));
+            return;
+        }
+        let filename = file.name();
+        let Ok(reader) = web_sys::FileReader::new() else { return };
+        let reader_clone = reader.clone();
+
+        set_uploading.set(true);
+
+        let onload = wasm_bindgen::closure::Closure::wrap(Box::new(move |_: web_sys::Event| {
+            if let Ok(result) = reader_clone.result() {
+                if let Some(data_url) = result.as_string() {
+                    let filename_clone = filename.clone();
+
+                    spawn_local(async move {
+                        let manager = ImageManager::new();
+                        match manager.store_image(&data_url, &filename_clone).await {
+                            Ok(id) => {
+                                log::info!("Image uploaded with ID: {}", id);
+                                set_toast_message.set(Some(format!("Image uploaded: {}", id)));
+
+                                // Reload images and refresh the compiler cache so the
+                                // new image is usable immediately (no page reload needed).
+                                match manager.list_all_images().await {
+                                    Ok(imgs) => {
+                                        let cache = imgs
+                                            .iter()
+                                            .map(|img| (img.id.clone(), img.data.clone()))
+                                            .collect::<HashMap<_, _>>();
+                                        set_image_cache.set(cache);
+                                        set_images.set(imgs);
+                                    }
+                                    Err(e) => log::error!("Failed to reload images: {}", e),
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Upload failed: {}", e);
+                                set_toast_message.set(Some(format!("Upload failed: {}", e)));
+                            }
+                        }
+                        set_uploading.set(false);
+                    });
+                }
+            }
+        }) as Box<dyn FnMut(_)>);
+
+        reader.set_onload(Some(onload.as_ref().unchecked_ref()));
+        let _ = reader.read_as_data_url(&file);
+        onload.forget();
+    };
+
+    // Handle file upload via the file picker
     let handle_upload = move |ev: web_sys::Event| {
-        let target = ev.target().unwrap();
-        let input = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
+        let Some(input) = ev.target()
+            .and_then(|t| t.dyn_into::<web_sys::HtmlInputElement>().ok())
+        else { return };
 
         if let Some(files) = input.files() {
             if let Some(file) = files.get(0) {
-                let filename = file.name();
-                let reader = web_sys::FileReader::new().unwrap();
-                let reader_clone = reader.clone();
-
-                set_uploading.set(true);
-
-                let onload = wasm_bindgen::closure::Closure::wrap(Box::new(move |_: web_sys::Event| {
-                    if let Ok(result) = reader_clone.result() {
-                        if let Some(data_url) = result.as_string() {
-                            let filename_clone = filename.clone();
-
-                            spawn_local(async move {
-                                let manager = ImageManager::new();
-                                match manager.store_image(&data_url, &filename_clone).await {
-                                    Ok(id) => {
-                                        log::info!("Image uploaded with ID: {}", id);
-                                        set_toast_message.set(Some(format!("Image uploaded: {}", id)));
-
-                                        // Reload images
-                                        match manager.list_all_images().await {
-                                            Ok(imgs) => set_images.set(imgs),
-                                            Err(e) => log::error!("Failed to reload images: {}", e),
-                                        }
-                                    }
-                                    Err(e) => {
-                                        log::error!("Upload failed: {}", e);
-                                        set_toast_message.set(Some(format!("Upload failed: {}", e)));
-                                    }
-                                }
-                                set_uploading.set(false);
-                            });
-                        }
-                    }
-                }) as Box<dyn FnMut(_)>);
-
-                reader.set_onload(Some(onload.as_ref().unchecked_ref()));
-                let _ = reader.read_as_data_url(&file);
-                onload.forget();
+                process_file(file);
             }
+        }
+    };
+
+    // Handle a file dropped onto the upload zone
+    let handle_drop = move |ev: web_sys::DragEvent| {
+        ev.prevent_default();
+        set_dragover.set(false);
+        if let Some(file) = ev
+            .data_transfer()
+            .and_then(|dt| dt.files())
+            .and_then(|files| files.get(0))
+        {
+            process_file(file);
         }
     };
 
@@ -116,9 +149,16 @@ pub fn ImageGalleryDrawer(
                     log::info!("Image deleted: {}", id);
                     set_toast_message.set(Some(format!("Deleted: {}", id)));
 
-                    // Reload images
+                    // Reload images and keep the compiler cache in sync.
                     match manager.list_all_images().await {
-                        Ok(imgs) => set_images.set(imgs),
+                        Ok(imgs) => {
+                            let cache = imgs
+                                .iter()
+                                .map(|img| (img.id.clone(), img.data.clone()))
+                                .collect::<HashMap<_, _>>();
+                            set_image_cache.set(cache);
+                            set_images.set(imgs);
+                        }
                         Err(e) => log::error!("Failed to reload images: {}", e),
                     }
                 }
@@ -135,7 +175,7 @@ pub fn ImageGalleryDrawer(
         <Show when=move || show.get()>
             <div class="drawer-overlay" on:click=move |_| set_show.set(false)></div>
 
-            <div class="drawer-container">
+            <div class="drawer-container" role="dialog" aria-modal="true" aria-label="Image gallery">
                 // Header
                 <div class="drawer-header">
                     <div class="flex items-center gap-2">
@@ -144,6 +184,7 @@ pub fn ImageGalleryDrawer(
                     </div>
                     <button
                         class="btn btn-sm btn-circle btn-ghost"
+                        aria-label="Close image gallery"
                         on:click=move |_| set_show.set(false)
                     >
                         <span class="icon-[lucide--x] text-xl"></span>
@@ -152,10 +193,16 @@ pub fn ImageGalleryDrawer(
 
                 // Upload section
                 <div class="drawer-content">
-                    <div class="upload-zone">
-                        <p class="text-sm text-warning font-semibold mb-3">
-                            "⚠️ After uploading, refresh the page (F5) to use images in the compiler"
-                        </p>
+                    <div
+                        class="upload-zone"
+                        class:dragover=move || dragover.get()
+                        on:dragover=move |ev: web_sys::DragEvent| {
+                            ev.prevent_default();
+                            set_dragover.set(true);
+                        }
+                        on:dragleave=move |_| set_dragover.set(false)
+                        on:drop=handle_drop
+                    >
                         <label class="btn btn-primary gap-2 cursor-pointer">
                             <input
                                 type="file"
@@ -176,7 +223,7 @@ pub fn ImageGalleryDrawer(
                             </Show>
                         </label>
                         <p class="text-sm text-base-content/60 mt-2">
-                            "Images will be assigned sequential IDs (001, 002, ...)"
+                            "Drag & drop an image here, or click to browse. IDs are assigned sequentially (001, 002, ...)"
                         </p>
                     </div>
 
@@ -214,6 +261,7 @@ pub fn ImageGalleryDrawer(
                                                     class="btn btn-xs btn-success gap-1"
                                                     on:click=move |_| copy_to_clipboard(id_copy.clone())
                                                     title="Copy code"
+                                                    aria-label="Copy image code"
                                                 >
                                                     <span class="icon-[lucide--copy] text-sm"></span>
                                                     "Copy"
@@ -222,6 +270,7 @@ pub fn ImageGalleryDrawer(
                                                     class="btn btn-xs btn-error gap-1"
                                                     on:click=move |_| delete_image(id_delete.clone())
                                                     title="Delete image"
+                                                    aria-label="Delete image"
                                                 >
                                                     <span class="icon-[lucide--trash-2] text-sm"></span>
                                                     "Delete"
@@ -251,6 +300,7 @@ pub fn ImageGalleryDrawer(
                         <span>{toast_message.get().unwrap_or_default()}</span>
                         <button
                             class="btn btn-xs btn-circle btn-ghost"
+                            aria-label="Dismiss notification"
                             on:click=move |_| set_toast_message.set(None)
                         >
                             "×"
