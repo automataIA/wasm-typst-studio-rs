@@ -30,13 +30,31 @@ and native builds share one source tree.
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Web development](#web-development)
+  - [Desktop development (Tauri)](#desktop-development-tauri)
 - [Building for Production](#building-for-production)
+  - [Web](#web)
+  - [Desktop](#desktop)
 - [Usage](#usage)
+  - [Basic editing](#basic-editing)
+  - [Autocomplete](#autocomplete)
+  - [Templates](#templates)
+  - [`@preview` packages](#preview-packages)
+  - [Preview navigation](#preview-navigation)
+  - [Sharing](#sharing)
+  - [Images](#images)
+  - [Bibliography](#bibliography)
+  - [Export](#export)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
+  - [Trunk.toml (development)](#trunktoml-development)
+  - [Trunk-release.toml (production)](#trunk-releasetoml-production)
+  - [rust-toolchain.toml](#rust-toolchaintoml)
 - [Known Limitations](#known-limitations)
 - [Contributing](#contributing)
 - [License](#license)
@@ -361,7 +379,7 @@ Released under the MIT License.
 - [Leptos](https://leptos.dev/) — the reactive Rust UI framework
 - [typst-as-lib](https://github.com/Relacibo/typst-as-lib) — library wrapper around the Typst compiler
 - [typst-ide](https://github.com/typst/typst) — autocomplete and click-to-jump
-- [Trunk](https://trunkrs.dev/) — WASM build tooling
+- [Trunk](https://trunk-rs.github.io/trunk/) — WASM build tooling
 
 ## Resources
 
