@@ -387,7 +387,7 @@ Released under the MIT License.
 
 - [QUICK_START.md](QUICK_START.md) — concise command reference
 - [TAURI_INTEGRATION.md](TAURI_INTEGRATION.md) — desktop integration guide
-- [CHANGELOG.md](CHANGELOG.md) — change history
+- [CHANGELOG.md](CHANGELOG.md) — change history  
 
 **Typst**
 
@@ -395,4 +395,4 @@ Released under the MIT License.
 
 **Rust, WASM & Tauri**
 
-- [Leptos Book](https://book.leptos.dev/) · [Trunk docs](https://trunkrs.dev/) · [WebAssembly concepts](https://developer.mozilla.org/en-US/docs/WebAssembly) · [Tauri docs](https://v2.tauri.app/)
+- [Leptos Book](https://book.leptos.dev/) · [Trunk docs](https://trunk-rs.github.io/trunk/) · [WebAssembly concepts](https://developer.mozilla.org/en-US/docs/WebAssembly) · [Tauri docs](https://v2.tauri.app/)
